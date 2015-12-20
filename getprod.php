@@ -176,7 +176,8 @@ function getProduct($u,$type,$cat){
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
 echo "Loaded URL: " . $u . "\n";
-  if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
+  if (strpos($d->find('div[typeof=Product]',0)->class,"simple") !== FALSE)
+//  if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
     return(getProductMult($d,$type,$cat));
   }
 echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
