@@ -180,7 +180,7 @@ function getProduct($u,$type,$cat){
   }
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
-  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
   $imgfile = $im[9];
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
@@ -266,7 +266,7 @@ function getProductMult($d,$type,$cat){
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $imgtitle = $d->find('a.product-image[rel=gal1]',0)->title;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
-  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
   $imgfile = $im[9];
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
@@ -288,7 +288,7 @@ function getProductMult($d,$type,$cat){
     $prodvis = 4;
     $groupedskus = "";
     $prodtype = "simple";
-    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
   } else {
     $groupskus = array();
     foreach ($d->find('table.grouped-items-table > tbody > tr.item') as $item) {
@@ -299,7 +299,7 @@ function getProductMult($d,$type,$cat){
       $groupedskus = "";
       $prodtype = "simple";
       $groupskus[] = $prodsku;
-      getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+      getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
     }
     $prodsku = $groupskus[0] . "g";
     $prodname = $d->find('div[itemprop=name]',0)->firstChild()->innertext;
@@ -307,10 +307,10 @@ function getProductMult($d,$type,$cat){
     $prodvis = 4;
     $groupedskus = implode(",",$groupskus);
     $prodtype = "simple";
-    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
   }
   getImages($d);
-  getReviews($d,$prodsku,0)->content);
+  getReviews($d,$prodsku);
   return 1;
 }
 
@@ -379,14 +379,14 @@ function getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodnam
   return 1;
 }
 
-getImages($d) {
+function getImages($d) {
   global $i,$o;
   $thumbs = $d->find('a.product-image[rel=gal1]');
   if (count($thumbs) > 1) {
     for ($x = 0; $x <= (count($thumbs) - 2); $x++) {
       $imgfileurlcache = $thumbs[$x]->href;
       $im = explode("/",strstr($imgfileurlcache,"media/"));
-      $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+      $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
       $imgfile = $im[9];
       $img = implode("/",array($im[7],$im[8],$im[9]));
       fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
@@ -408,7 +408,7 @@ getImages($d) {
   }
 }
 
-getReviews($d,$sku) {
+function getReviews($d,$sku) {
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
     foreach ($reviews as $rev) {
