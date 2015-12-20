@@ -2,7 +2,7 @@
 // This is a template for a PHP scraper on morph.io (https://morph.io)
 // including some code snippets below that you should find helpful
 $local = 1;
-$baseurl = "http://www.woodcraft.com";
+$baseurl = "http://www.bulkreefsupply.com";
 $o = fopen("./prodlist.csv", "w+");
 if ($local) {
   require '../scraperwiki-php/scraperwiki.php';
@@ -17,7 +17,7 @@ if ($local) {
 echo "Opening categories.csv for reading...\n";
 if (($f = fopen("./categories.csv", "r")) !== FALSE) {
   while (($data = fgetcsv($f)) !== FALSE) {
-    getProducts($data[2]);
+    getProducts($data[2],$data[1] . "|" . $data[0]);
   }
   fclose($f);
 }
@@ -29,26 +29,29 @@ fclose($o);
 //   Category name
 //   path
 //   URL
-//   
-function getProducts($u){
-  global $baseurl, $o, $local;
-  $path = "";
+//   Will need to use sort prodlist.csv | uniq to fix the file and remove duplicates
+//   Prodtype 0 = simple, 1 = grouped or configurable
+function getProducts($u,$cat){
+  global $o;
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
 //echo "Loaded URL: " . $u . "\n";
-  $S2Prod = $d->find('span[class=S2Product]');
-  if (count($S2Prod) > 0) {
-  	foreach ($S2Prod as $p) {
-  		$sku = trim($p->find('div[class=S2ProductSku]',0)->innertext,"# ");
-  		$prodname = trim($p->find('div[class=S2ProductName]',0)->first_child()->innertext);
-  		$prodthumb = $p->find('img[class=S2ProductImg]',0)->src;
-  		$prodURL = $p->find('div[class=S2ProductName]',0)->first_child()->href;
-  		fputcsv($o,array($sku, $prodname, $prodthumb, $prodURL));
+  $items = $d->find('li.grid-item');
+  if (count($items) > 0) {
+  	foreach ($item as $p) {
+  		$prod = $p->find('p.product-name > a',0);
+  		$prodname = trim($prod->innertext);
+  		$prodURL = $prod->href;
+  		if (!is_null($p->find('p.minimal-price',0))) {
+  		  $prodtype = 1;
+  		} else {
+  		  $prodtype = 0;
+  		}
+  		fputcsv($o,array($prodname, $prodtype, $cat, $prodURL));
 echo $prodname . "\n";
   	}
-  	if ($d->find('div[class=S2itemsPPText]',0)->last_child()->style == "display: inline") {
-  		$newURL = $baseurl . $d->find('div[class=S2itemsPPText]',0)->last_child()->href;
-  		getProducts($newURL);
+  	if (!is_null($d->find('p.next',0))) {
+  		getProducts($d->find('p.next',0)->href,$cat);
   	}
   }
 }
