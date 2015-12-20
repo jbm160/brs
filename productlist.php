@@ -38,7 +38,7 @@ function getProducts($u,$cat){
 //echo "Loaded URL: " . $u . "\n";
   $items = $d->find('li.grid-item');
   if (count($items) > 0) {
-  	foreach ($item as $p) {
+  	foreach ($items as $p) {
   		$prod = $p->find('p.product-name > a',0);
   		$prodname = trim($prod->innertext);
   		$prodURL = $prod->href;
