@@ -430,7 +430,8 @@ echo "getReviews: " . $sku . "\n";
       fputcsv($r,$data);
     }
   }
-  if (($newurl = $d->find('#tab-reviews a.next',0)->href) !== FALSE) {
+  if (!is_null($d->find('#tab-reviews a.next',0))) {
+    $newurl = $d->find('#tab-reviews a.next',0)->href;
 echo "Another page of reviews found: " . $newurl . "\n";
     $d->load(scraperwiki::scrape($newurl));
     getReviews($d,$sku);
