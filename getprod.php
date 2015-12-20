@@ -413,7 +413,7 @@ echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext .
 }
 
 function getReviews($d,$sku) {
-echo "getReviews: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
+echo "getReviews: " . $sku . "\n";
   global $r;
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
