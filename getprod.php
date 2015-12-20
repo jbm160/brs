@@ -91,6 +91,7 @@ if ($local) {
 echo "Opening prodlist.csv for reading...\n";
 if (($f = fopen("./prodlist.csv", "r")) !== FALSE) {
   while (($data = fgetcsv($f)) !== FALSE) {
+echo "Retrieving " . $data[0] . "\n";
     $produrl = $data[3];
     $prodtype = $data[1];
     $prodcat = $data[2];
