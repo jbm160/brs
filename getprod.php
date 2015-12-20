@@ -174,10 +174,11 @@ function getProduct($u,$type,$cat){
   global $baseurl, $o, $r, $i, $e, $local;
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
-//echo "Loaded URL: " . $u . "\n";
+echo "Loaded URL: " . $u . "\n";
   if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
     return(getProductMult($d,$type,$cat));
   }
+echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
   $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
@@ -381,6 +382,7 @@ function getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodnam
 }
 
 function getImages($d) {
+echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
   global $i,$o;
   $thumbs = $d->find('a.product-image[rel=gal1]');
   if (count($thumbs) > 1) {
@@ -410,6 +412,7 @@ function getImages($d) {
 }
 
 function getReviews($d,$sku) {
+echo "getReviews: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
   global $r;
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
