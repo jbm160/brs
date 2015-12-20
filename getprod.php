@@ -194,8 +194,8 @@ function getProduct($u,$type,$cat){
   } else {
     $description = "";
   }
-    $brand = "";
-  }
+  $brand = "";
+  
   $data = array(
     $d->find('meta[itemprop=sku]',0)->content,
     "",
@@ -263,9 +263,54 @@ function getProduct($u,$type,$cat){
 }
 
 function getProductMult($d,$type,$cat){
-  if (count($d->find('table.grouped-items-table > tbody > tr.item')) < 2) {
-  
+  $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
+  $imgtitle = $d->find('a.product-image[rel=gal1]',0)->title;
+  $im = explode("/",strstr($imgfileurlcache,"media/"));
+  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+  $imgfile = $im[9];
+  $img = implode("/",array($im[7],$im[8],$im[9]));
+  fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
+  if (!is_null($d->find('div[itemprop=description]',0))) {
+    $shortdesc = $d->find('div[itemprop=description]',0)->innertext;
+  } else {
+    $shortdesc = "";
   }
+  if (!is_null($d->find('#tab-full-details',0))) {
+    $description = $d->find('#tab-full-details',0)->innertext;
+  } else {
+    $description = "";
+  }
+  $brand = "";
+  if (count($d->find('table.grouped-items-table > tbody > tr.item')) < 2) {
+    $prodsku = trim($d->find('table.grouped-items-table > tbody > tr.item span.sku',0)->innertext,"SKU: ");
+    $prodname = $d->find('table.grouped-items-table > tbody > tr.item div.product-name',0)->innertext;
+    $prodprice = trim($d->find('table.grouped-items-table > tbody > tr.item span.price',0)->innertext,"$ ");
+    $prodvis = 4;
+    $groupedskus = "";
+    $prodtype = "simple";
+    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+  } else {
+    $groupskus = array();
+    foreach ($d->find('table.grouped-items-table > tbody > tr.item') as $item) {
+      $prodsku = trim($d->find('table.grouped-items-table > tbody > tr.item span.sku',0)->innertext,"SKU: ");
+      $prodname = $d->find('table.grouped-items-table > tbody > tr.item div.product-name',0)->innertext;
+      $prodprice = trim($d->find('table.grouped-items-table > tbody > tr.item span.price',0)->innertext,"$ ");
+      $prodvis = 1;
+      $groupedskus = "";
+      $prodtype = "simple";
+      $groupskus[] = $prodsku;
+      getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+    }
+    $prodsku = $groupskus[0] . "g";
+    $prodname = $d->find('div[itemprop=name]',0)->firstChild()->innertext;
+    $prodprice = "";
+    $prodvis = 4;
+    $groupedskus = implode(",",$groupskus);
+    $prodtype = "simple";
+    getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus)
+  }
+  getImages($d);
+  getReviews($d,$prodsku,0)->content);
   return 1;
 }
 
