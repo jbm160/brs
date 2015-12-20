@@ -180,7 +180,8 @@ echo "Loaded URL: " . $u . "\n";
 //  if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
     return(getProductMult($d,$type,$cat));
   }
-echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
+  $prodname = $d->find('div[itemprop=name]',0)->firstChild()->innertext;
+echo "Line 181: " . $prodname . "\n";
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
   $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
@@ -216,7 +217,7 @@ echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . 
     "",
     "Use config",
     "Use config",
-    $d->find('div[itemprop=name]',0)->firstChild()->innertext,
+    $prodname,
     "Product Info Column",
     "1 column",
     $d->find('meta[itemprop=price]',0)->content,
@@ -261,7 +262,7 @@ echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . 
   fputcsv($o,$data);
   getImages($d);
   getReviews($d,$d->find('meta[itemprop=sku]',0)->content);
-  echo trim($d->find('div[itemprop=name]',0)->firstChild()->innertext) . "\n";
+  echo trim($prodname) . "\n";
   return 1;
 }
 
