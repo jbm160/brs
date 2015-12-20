@@ -16,7 +16,8 @@ $baseurl="http://www.bulkreefsupply.com";
 $f = fopen("./categories.csv", "w+");
 $html = $baseurl . "/index.php";
 $d = new simple_html_dom();
-$d->load(scraperwiki::scrape($u));
+$d->load(scraperwiki::scrape($html));
+//echo $d->innertext;
 $cats = array();
 getCategories($d);
 foreach ($cats as $cat) {
@@ -32,15 +33,16 @@ fclose($f);
 //   
 function getCategories($d){
   global $baseurl, $f, $local, $cats;
-  $topcat = $d->find('ul[id=nav] li');
+  $topcat = $d->find('ul[id=nav] > li.level0');
   foreach ($topcat as $top) {
+//echo $top->innertext . "\n";
   	$catname = $top->find('span.cat-title-sub-menu',0)->innertext;
   	$caturl = $top->find('a',0)->href;
-  	$cats[] = array($catname,"/",$caturl);
+  	$cats[] = array($catname,"|",$caturl);
   	$l1 = $top->find('ul.level0 > li.level1');
   	foreach ($l1 as $lev1) {
-  		$l1name = $lev1->find('a span:not(.arrow)',0)->innertext;
-  		$l1path = $catname . "/";
+  		$l1name = $lev1->find('a > span',0)->innertext;
+  		$l1path = $catname . "|";
   		$l1url = $lev1->find('a',0)->href;
   		$cats[] = array($l1name,$l1path,$l1url);
   		if (strpos($lev1->class,"parent") !== FALSE) {
@@ -51,10 +53,11 @@ function getCategories($d){
 }
 
 function getChildren($d,$path) {
-	$children = $d->find(ul li);
+	global $cats;
+	$children = $d->find('ul li');
 	foreach ($children as $child) {
-		$childname = $child->find(a span:not(.arrow)',0)->innertext;
-		$childpath = $path . "/";
+		$childname = $child->find('a > span',0)->innertext;
+		$childpath = $path . "|";
 		$childurl = $child->find('a',0)->href;
 		$cats[] = array($childname,$childpath,$childurl);
 		if (strpos($child->class,"parent") !== FALSE) {
