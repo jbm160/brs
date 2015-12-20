@@ -430,8 +430,8 @@ echo "getReviews: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext 
       fputcsv($r,$data);
     }
   }
-  $newurl = $d->find('#tab-reviews a.next',0);
-  if (!is_null($newurl)) {
+  if (($newurl = $d->find('#tab-reviews a.next',0) !== FALSE) {
+echo "Another page of reviews found: " . $newurl->href . "\n";
     $d->load(scraperwiki::scrape($newurl->href));
     getReviews($newurl,$sku);
   }
