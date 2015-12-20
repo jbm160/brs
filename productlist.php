@@ -17,7 +17,7 @@ if ($local) {
 echo "Opening categories.csv for reading...\n";
 if (($f = fopen("./categories.csv", "r")) !== FALSE) {
   while (($data = fgetcsv($f)) !== FALSE) {
-    getProducts($data[2],$data[1] . "|" . $data[0]);
+    getProducts($data[2],$data[1] . $data[0]);
   }
   fclose($f);
 }
