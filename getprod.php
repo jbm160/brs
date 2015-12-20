@@ -263,6 +263,7 @@ function getProduct($u,$type,$cat){
 }
 
 function getProductMult($d,$type,$cat){
+  global $i, $o;
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $imgtitle = $d->find('a.product-image[rel=gal1]',0)->title;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
@@ -409,6 +410,7 @@ function getImages($d) {
 }
 
 function getReviews($d,$sku) {
+  $global $r;
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
     foreach ($reviews as $rev) {
