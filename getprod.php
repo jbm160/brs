@@ -64,7 +64,8 @@ $data = array(
   "_media_image",
   "_media_lable",
   "_media_position",
-  "_media_is_disabled"
+  "_media_is_disabled",
+  "grouped_skus"
   );
 fputcsv($o,$data);
 $data = array(
@@ -88,11 +89,13 @@ if ($local) {
 //
 // // Read in a page
 echo "Opening prodlist.csv for reading...\n";
-if (($f = fopen("./uniqprod.csv", "r")) !== FALSE) {
+if (($f = fopen("./prodlist.csv", "r")) !== FALSE) {
   while (($data = fgetcsv($f)) !== FALSE) {
-    $produrl = $baseurl . $data[3];
-    if (!getProduct($produrl)) {
-      fputcsv($e,array($data[0],$data[1],$data[2],$data[3]));
+    $produrl = $data[3];
+    $prodtype = $data[1];
+    $prodcat = $data[2];
+    if (!getProduct($produrl,$prodtype,$prodcat)) {
+      fputcsv($e,$data);
     }
   }
   fclose($f);
@@ -167,44 +170,38 @@ _media_is_disabled
 //   path
 //   URL
 //   
-function getProduct($u){
-  global $baseurl, $o, $r, $i, $local;
-  $path = "";
+function getProduct($u,$type,$cat){
+  global $baseurl, $o, $r, $i, $e, $local;
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
-  if (is_null($d->find('div[id=medproimg]',0))) {
-    return 0;
-  }
 //echo "Loaded URL: " . $u . "\n";
-  $imgfileurl = $d->find('div[id=medproimg]',0)->first_child()->href;
-  $imgfile = trim(strrchr($imgfileurl,"/"),"/ ");
-  $img = "/" . substr($imgfile,0,1) . "/" . substr($imgfile,1,1) . "/" . $imgfile;
-  fputcsv($i,array($imgfileurl,$img));
-  $catname = "";
-  $cats = $d->find('div[id=breadcrumb] ul li a');
-  foreach ($cats as $cat) {
-    $catname .= trim($cat->innertext) . "/";
+  if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
+    return(getProductMult($d,$type,$cat));
   }
-  $catname .= trim($d->find('div[id=breadcrumb] ul a b',0)->innertext);
-  if (!is_null($d->find('div[id=prospecsbox]',0))) {
-    $description = $d->find('div[id=prospecsbox]',0)->outertext;
+  $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
+  $im = explode("/",strstr($imgfileurlcache,"media/"));
+  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+  $imgfile = $im[9];
+  $img = implode("/",array($im[7],$im[8],$im[9]));
+  fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
+  if (!is_null($d->find('div[itemprop=description]',0))) {
+    $shortdesc = $d->find('div[itemprop=description]',0)->innertext;
+  } else {
+    $shortdesc = "";
+  }
+  if (!is_null($d->find('#tab-full-details',0))) {
+    $description = $d->find('#tab-full-details',0)->innertext;
   } else {
     $description = "";
   }
-  if (!is_null($d->find('div[id=ctl00_cphContent_divShippingBilling]',0))) {
-    $description .= $d->find('div[id=ctl00_cphContent_divShippingBilling]',0)->outertext;
-  }
-  if (!is_null($d->find('span[id=ctl00_cphContent_hidebrandid]',0))) {
-    $brand = trim($d->find('span[id=ctl00_cphContent_hidebrandid]',0)->first_child()->innertext);
-  } else {
     $brand = "";
   }
   $data = array(
-    trim($d->find('span[id=pskuonly]',0)->innertext),
+    $d->find('meta[itemprop=sku]',0)->content,
     "",
     "Default",
     "simple",
-    $catname,
+    $cat,
     "Home",
     "base",
     "12/12/15 22:48",
@@ -216,12 +213,12 @@ function getProduct($u){
     "",
     "Use config",
     "Use config",
-    trim($d->find('div[id=productname]',0)->first_child()->innertext),
+    $d->find('div[itemprop=name]',0)->firstChild()->innertext,
     "Product Info Column",
     "1 column",
-    trim($d->find('div[id=proprice]',0)->first_child()->innertext,"$ "),
+    $d->find('meta[itemprop=price]',0)->content,
     0,
-    "",
+    $shortdesc,
     $img,
     1,
     2,
@@ -253,18 +250,101 @@ function getProduct($u){
     0,
     88,
     $img,
-    $d->find('div[id=medproimg]',0)->first_child()->title,
+    $d->find('a.product-image[rel=gal1]',0)->title,
     1,
-    0    
-    );
+    0,
+    ""
+  );
   fputcsv($o,$data);
-  $thumbs = $d->find('div[id=altvidthmbs] thmbs');
+  getImages($d);
+  getReviews($d,$d->find('meta[itemprop=sku]',0)->content);
+  echo trim($d->find('div[id=productname]',0)->first_child()->innertext) . "\n";
+  return 1;
+}
+
+function getProductMult($d,$type,$cat){
+  if (count($d->find('table.grouped-items-table > tbody > tr.item')) < 2) {
+  
+  }
+  return 1;
+}
+
+function getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus) {
+  global $o;
+  $data = array(
+    $prodsku,
+    "",
+    "Default",
+    $prodtype,
+    $cat,
+    "Home",
+    "base",
+    "12/12/15 22:48",
+    $description,
+    "No",
+    0,
+    $img,
+    $brand,
+    "",
+    "Use config",
+    "Use config",
+    $prodname,
+    "Product Info Column",
+    "1 column",
+    $prodprice,
+    0,
+    $shortdesc,
+    $img,
+    1,
+    2,
+    $img,
+    "12/12/15 22:48",
+    "",
+    "",
+    $prodvis,
+    1.0000,
+    0,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    0,
+    88,
+    $img,
+    $imgtitle,
+    1,
+    0,
+    $groupedskus
+  );
+  fputcsv($o,$data);
+  return 1;
+}
+
+getImages($d) {
+  global $i,$o;
+  $thumbs = $d->find('a.product-image[rel=gal1]');
   if (count($thumbs) > 1) {
     for ($x = 0; $x <= (count($thumbs) - 2); $x++) {
-      $imgfileurl = $thumbs[$x]->first_child()->href;
-      $imgfile = trim(strrchr($imgfileurl,"/"),"/ ");
-      $img = "/" . substr($imgfile,0,1) . "/" . substr($imgfile,1,1) . "/" . $imgfile;
-      fputcsv($i,array($imgfileurl,$img));
+      $imgfileurlcache = $thumbs[$x]->href;
+      $im = explode("/",strstr($imgfileurlcache,"media/"));
+      $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]))
+      $imgfile = $im[9];
+      $img = implode("/",array($im[7],$im[8],$im[9]));
+      fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
       $data = array(
         "","","","","","","","","","",
         "","","","","","","","","","",
@@ -273,30 +353,37 @@ function getProduct($u){
         "","","","","","","","","","",
         "","88",
         $img,
-        $thumbs[$x]->first_child()->title,
+        $thumbs[$x]->title,
         ($x + 2),
-        0
+        0,
+        ""
         );
       fputcsv($o,$data);
     }
   }
-  $reviews = $d->find('table[id=ctl00_cphContent_datalistReviews] div.pr-review-wrap');
+}
+
+getReviews($d,$sku) {
+  $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
     foreach ($reviews as $rev) {
       $data = array(
-        trim($d->find('span[id=pskuonly]',0)->innertext),
-        trim($rev->find('p.pr-review-rating-headline span',0)->innertext),
-        trim($rev->find('span.pr-rating',0)->innertext),
-        trim($rev->find('span[id$=labelUser]',0)->innertext),
-        trim($rev->find('span[id$=labelLocation]',0)->innertext),
-        trim($rev->find('div.pr-review-author-date',0)->innertext),
-        trim($rev->find('span[id$=labelComments]',0)->innertext)
+        $sku,
+        trim($rev->find('span[property=name]',0)->innertext),
+        round(($rev->find('meta[property=ratingValue]',0)->content)/20,1),
+        trim($rev->find('span[property=author]',0)->innertext),
+        "",
+        trim($rev->find('meta[property=datePublished]',0)->content,"on "),
+        trim($rev->find('div.review-text',0)->innertext)
       );
       fputcsv($r,$data);
     }
   }
-  echo trim($d->find('div[id=productname]',0)->first_child()->innertext) . "\n";
-  return 1;
+  $newurl = $d->find('#tab-reviews a.next',0);
+  if (!is_null($newurl)) {
+    $d->load(scraperwiki::scrape($newurl->href));
+    getReviews($newurl,$sku);
+  }
 }
 
 ?>
