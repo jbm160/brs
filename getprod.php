@@ -260,7 +260,7 @@ echo "Line 181: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . 
   fputcsv($o,$data);
   getImages($d);
   getReviews($d,$d->find('meta[itemprop=sku]',0)->content);
-  echo trim($d->find('div[id=productname]',0)->first_child()->innertext) . "\n";
+  echo trim($d->find('div[itemprop=name]',0)->firstChild()->innertext) . "\n";
   return 1;
 }
 
