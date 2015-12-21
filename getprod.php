@@ -7,6 +7,7 @@ $o = fopen("./detprodlist.csv", "w+");
 $r = fopen("./reviews.csv", "w+");
 $i = fopen("./images.csv", "w+");
 $e = fopen("./errors.csv", "a+");
+$revs = array();
 fputcsv($i,array("Original Image URL","New Image URL"));
 $data = array(
   "sku",
@@ -172,8 +173,7 @@ _media_is_disabled
 //   URL
 //   
 function getProduct($u,$type,$cat){
-  global $baseurl, $o, $r, $i, $e, $local;
-  $revs = array();
+  global $baseurl, $o, $r, $i, $e, $local, $revs;
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
 //echo "Loaded URL: " . $u . "\n";
@@ -269,7 +269,7 @@ function getProduct($u,$type,$cat){
 }
 
 function getProductMult($d,$type,$cat){
-  global $i, $o;
+  global $i, $o, $revs;
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $imgtitle = $d->find('a.product-image[rel=gal1]',0)->title;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
@@ -299,14 +299,16 @@ function getProductMult($d,$type,$cat){
   } else {
     $groupskus = array();
     foreach ($d->find('table.grouped-items-table > tbody > tr.item') as $item) {
-      $prodsku = trim($item->find('span.sku',0)->innertext,"SKU: ");
-      $prodname = $item->find('div.product-name',0)->innertext;
-      $prodprice = trim($item->find('span.price',0)->innertext,"$ ");
-      $prodvis = 1;
-      $groupedskus = "";
-      $prodtype = "simple";
-      $groupskus[] = $prodsku;
-      getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
+      if (!is_null($item->find('span.sku'),0)) {
+        $prodsku = trim($item->find('span.sku',0)->innertext,"SKU: ");
+        $prodname = $item->find('div.product-name',0)->innertext;
+        $prodprice = trim($item->find('span.price',0)->innertext,"$ ");
+        $prodvis = 1;
+        $groupedskus = "";
+        $prodtype = "simple";
+        $groupskus[] = $prodsku;
+        getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
+      }
     }
     $prodsku = $groupskus[0] . "g";
     $prodname = $d->find('div[itemprop=name]',0)->firstChild()->innertext;
