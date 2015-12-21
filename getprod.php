@@ -299,7 +299,7 @@ function getProductMult($d,$type,$cat){
   } else {
     $groupskus = array();
     foreach ($d->find('table.grouped-items-table > tbody > tr.item') as $item) {
-      if (!is_null($item->find('span.sku'),0)) {
+      if (!is_null($item->find('span.sku',0))) {
         $prodsku = trim($item->find('span.sku',0)->innertext,"SKU: ");
         $prodname = $item->find('div.product-name',0)->innertext;
         $prodprice = trim($item->find('span.price',0)->innertext,"$ ");
