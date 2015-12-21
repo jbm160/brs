@@ -175,13 +175,13 @@ function getProduct($u,$type,$cat){
   global $baseurl, $o, $r, $i, $e, $local;
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
-echo "Loaded URL: " . $u . "\n";
+//echo "Loaded URL: " . $u . "\n";
   if (strpos($d->find('div[typeof=Product]',0)->class,"grouped") !== FALSE) {
 //  if (!is_null($d->find('div.grouped[typeof=Product]',0))) {
     return(getProductMult($d,$type,$cat));
   }
   $prodname = $d->find('div[itemprop=name]',0)->firstChild()->innertext;
-echo "Line 181: " . $prodname . "\n";
+//echo "Line 181: " . $prodname . "\n";
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
   $imgfileurl = strstr($imgfileurlcache,"media/",true) . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
@@ -199,9 +199,9 @@ echo "Line 181: " . $prodname . "\n";
     $description = "";
   }
   $brand = "";
-  
+  $prodsku = $d->find('meta[itemprop=sku]',0)->content;
   $data = array(
-    $d->find('meta[itemprop=sku]',0)->content,
+    $prodsku,
     "",
     "Default",
     "simple",
@@ -262,7 +262,7 @@ echo "Line 181: " . $prodname . "\n";
   fputcsv($o,$data);
   getImages($d);
   getReviews($d,$d->find('meta[itemprop=sku]',0)->content);
-  echo trim($prodname) . "\n";
+  echo "Saved " . $prodsku . ": " . $prodname . ", simple product.\n";
   return 1;
 }
 
@@ -297,9 +297,9 @@ function getProductMult($d,$type,$cat){
   } else {
     $groupskus = array();
     foreach ($d->find('table.grouped-items-table > tbody > tr.item') as $item) {
-      $prodsku = trim($d->find('table.grouped-items-table > tbody > tr.item span.sku',0)->innertext,"SKU: ");
-      $prodname = $d->find('table.grouped-items-table > tbody > tr.item div.product-name',0)->innertext;
-      $prodprice = trim($d->find('table.grouped-items-table > tbody > tr.item span.price',0)->innertext,"$ ");
+      $prodsku = trim($item->find('span.sku',0)->innertext,"SKU: ");
+      $prodname = $item->find('div.product-name',0)->innertext;
+      $prodprice = trim($item->find('span.price',0)->innertext,"$ ");
       $prodvis = 1;
       $groupedskus = "";
       $prodtype = "simple";
@@ -381,11 +381,12 @@ function getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodnam
     $groupedskus
   );
   fputcsv($o,$data);
+  echo "Saved " . $prodsku . ": " . $prodname . ", " . $prodtype . " product.\n";
   return 1;
 }
 
 function getImages($d) {
-echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
+//echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext . "\n";
   global $i,$o;
   $thumbs = $d->find('a.product-image[rel=gal1]');
   if (count($thumbs) > 1) {
@@ -415,7 +416,7 @@ echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext .
 }
 
 function getReviews($d,$sku) {
-echo "getReviews: " . $sku . "\n";
+//echo "getReviews: " . $sku . "\n";
   global $r;
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
@@ -434,7 +435,7 @@ echo "getReviews: " . $sku . "\n";
   }
   if (!is_null($d->find('a.i-next',0))) {
     $newurl = $d->find('a.i-next',0)->href;
-echo "Another page of reviews found: " . $newurl . "\n";
+//echo "Another page of reviews found: " . $newurl . "\n";
     $d->load(scraperwiki::scrape($newurl));
     getReviews($d,$sku);
   }
