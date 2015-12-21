@@ -443,7 +443,7 @@ function getReviews($d,$sku) {
     $d->load(scraperwiki::scrape($newurl));
     getReviews($d,$sku);
   } else {
-    echo "Saved " . $revs[$sku] . " reviews for sku: " . $sku ".\n";
+    echo "Saved " . $revs[$sku] . " reviews for sku: " . $sku . ".\n";
   }
 }
 
