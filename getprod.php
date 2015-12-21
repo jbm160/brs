@@ -173,6 +173,7 @@ _media_is_disabled
 //   
 function getProduct($u,$type,$cat){
   global $baseurl, $o, $r, $i, $e, $local;
+  $revs = array();
   $d = new simple_html_dom();
   $d->load(scraperwiki::scrape($u));
 //echo "Loaded URL: " . $u . "\n";
@@ -311,7 +312,7 @@ function getProductMult($d,$type,$cat){
     $prodprice = "";
     $prodvis = 4;
     $groupedskus = implode(",",$groupskus);
-    $prodtype = "simple";
+    $prodtype = "grouped";
     getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
   }
   getImages($d);
@@ -417,9 +418,10 @@ function getImages($d) {
 
 function getReviews($d,$sku) {
 //echo "getReviews: " . $sku . "\n";
-  global $r;
+  global $r,$revs;
   $reviews = $d->find('#product-reviews-list > li.review');
   if (count($reviews) > 0) {
+    $revs[$sku] += count($reviews);
     foreach ($reviews as $rev) {
       $data = array(
         $sku,
@@ -438,6 +440,8 @@ function getReviews($d,$sku) {
 //echo "Another page of reviews found: " . $newurl . "\n";
     $d->load(scraperwiki::scrape($newurl));
     getReviews($d,$sku);
+  } else {
+    echo "Saved " . $revs[$sku] . " reviews for sku: " . $sku ".\n";
   }
 }
 
