@@ -184,7 +184,7 @@ echo "Loaded URL: " . $u . "\n";
 echo "Line 181: " . $prodname . "\n";
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
-  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
+  $imgfileurl = strstr($imgfileurlcache,"media/",true) . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
   $imgfile = $im[9];
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
@@ -271,7 +271,7 @@ function getProductMult($d,$type,$cat){
   $imgfileurlcache = $d->find('a.product-image[rel=gal1]',0)->href;
   $imgtitle = $d->find('a.product-image[rel=gal1]',0)->title;
   $im = explode("/",strstr($imgfileurlcache,"media/"));
-  $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
+  $imgfileurl = strstr($imgfileurlcache,"media/",true) . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
   $imgfile = $im[9];
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
@@ -389,10 +389,10 @@ echo "getImages: " . $d->find('div[itemprop=name]',0)->firstChild()->innertext .
   global $i,$o;
   $thumbs = $d->find('a.product-image[rel=gal1]');
   if (count($thumbs) > 1) {
-    for ($x = 0; $x <= (count($thumbs) - 2); $x++) {
+    for ($x = 1; $x <= (count($thumbs) - 1); $x++) {
       $imgfileurlcache = $thumbs[$x]->href;
       $im = explode("/",strstr($imgfileurlcache,"media/"));
-      $imgfileurl = strstr($imgfileurlcache,"media/") . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
+      $imgfileurl = strstr($imgfileurlcache,"media/",true) . implode("/",array($im[0],$im[1],$im[2],$im[7],$im[8],$im[9]));
       $imgfile = $im[9];
       $img = implode("/",array($im[7],$im[8],$im[9]));
       fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
