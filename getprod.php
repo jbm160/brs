@@ -190,12 +190,12 @@ function getProduct($u,$type,$cat){
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
   if (!is_null($d->find('div[itemprop=description]',0))) {
-    $shortdesc = $d->find('div[itemprop=description]',0)->innertext;
+    $shortdesc = trim($d->find('div[itemprop=description]',0)->innertext);
   } else {
     $shortdesc = "";
   }
   if (!is_null($d->find('#tab-full-details',0))) {
-    $description = $d->find('#tab-full-details',0)->innertext;
+    $description = trim($d->find('#tab-full-details',0)->innertext);
   } else {
     $description = "";
   }
@@ -278,12 +278,12 @@ function getProductMult($d,$type,$cat){
   $img = implode("/",array($im[7],$im[8],$im[9]));
   fputcsv($i,array($imgfileurl,$img, $imgfileurlcache));
   if (!is_null($d->find('div[itemprop=description]',0))) {
-    $shortdesc = $d->find('div[itemprop=description]',0)->innertext;
+    $shortdesc = trim($d->find('div[itemprop=description]',0)->innertext);
   } else {
     $shortdesc = "";
   }
   if (!is_null($d->find('#tab-full-details',0))) {
-    $description = $d->find('#tab-full-details',0)->innertext;
+    $description = trim($d->find('#tab-full-details',0)->innertext);
   } else {
     $description = "";
   }
