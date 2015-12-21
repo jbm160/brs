@@ -262,7 +262,8 @@ function getProduct($u,$type,$cat){
   );
   fputcsv($o,$data);
   getImages($d);
-  getReviews($d,$d->find('meta[itemprop=sku]',0)->content);
+  $revs[$prodsku] = 0;
+  getReviews($d,$prodsku);
   echo "Saved " . $prodsku . ": " . $prodname . ", simple product.\n";
   return 1;
 }
@@ -316,6 +317,7 @@ function getProductMult($d,$type,$cat){
     getGroupedSku($prodsku,$prodtype,$cat,$description,$img,$brand,$prodname,$prodprice,$shortdesc,$prodvis,$imgtitle,$groupedskus);
   }
   getImages($d);
+  $revs[$prodsku] = 0;
   getReviews($d,$prodsku);
   return 1;
 }
