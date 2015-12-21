@@ -411,7 +411,7 @@ function getImages($d) {
         "","88",
         $img,
         $thumbs[$x]->title,
-        ($x + 2),
+        ($x + 1),
         0,
         ""
         );
